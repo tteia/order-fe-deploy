@@ -1,7 +1,8 @@
 <template>
   <!-- <img alt="Vue logo" src="./assets/logo.png">
   <HelloWorld msg="Welcome to Your Vue.js App"/> -->
-  <div>hello world</div>
+  <!-- router-view 를 통해 app.vue 에서 화면 라우팅. -->
+  <router-view />
 </template>
 <!-- template 에는 html 코드가 들어가고, script 에는 js 코드가 들어감. -->
 <!-- 디자인은 style 태그 안에 들어감. -->
