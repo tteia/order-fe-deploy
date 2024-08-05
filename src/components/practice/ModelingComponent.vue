@@ -2,6 +2,10 @@
     <!-- HTML 요소의 동적 값 표시 -->
     <!-- html 요소 안에 중괄호 2번을 사용함으로서 script 에 정의된 변수값을 화면에 표시한다. -->
     <h1>hello {{world}}</h1>
+    <br/>
+    <v-btn @click="toggleWorld('value1')">🌎 HELLO ASTERUM</v-btn>
+    <br/>
+    <br/>
 
     <!-- :value 는 단방향 데이터 바인딩-->
     <input type="test" :value="value1" style="background-color: aliceblue;">
@@ -41,6 +45,9 @@
                 return this.count * 2;
             }
         },
+        created(){
+            alert("created 함수인데 router test 타고 오면 안 보 이 지 롱") // 엥 보여,,
+        },
         methods:{
             showValue(){
                 alert(this.value2)
@@ -50,9 +57,19 @@
             },
             increment2(){
                 this.count2++;
+            },
+            changeWorld1() {
+                this.world = this.value1;
+            },
+            toggleWorld(value) {
+                if (this.world === this[value]) {
+                    this.world = "world";
+                } else {
+                    this.world = this[value];
+                }
             }
-        }
     }
+}
 </script>
 <style>
 #app {

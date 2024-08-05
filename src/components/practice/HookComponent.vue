@@ -1,5 +1,7 @@
 <template>
     <h1>🌱 Lifecycle Hooks _ 생명주기 함수</h1>
+    <h3>vue 생명주기 : 만들어지고, 소멸될 때까지의 어떤 흐름, 주기</h3>
+    <p>created, mounted, beforeunmount, update, watch</p>
     <br />
     <br />
     <p>{{ data1 }}</p>
