@@ -14,7 +14,7 @@
                             <v-text-field label="email" type="email" v-model="email" prepend-icon="mdi-email" required></v-text-field>
                             <v-text-field label="password" type="password" v-model="password" prepend-icon="mdi-lock" required></v-text-field>
                             <v-row>
-                                <v-col cols="6"><v-btn style="background-color:cornsilk;" block > 비밀번호 찾기 </v-btn></v-col>
+                                <v-col cols="6"><v-btn @click="showPasswordModal" style="background-color:cornsilk;" block > 비밀번호 찾기(변경) </v-btn></v-col>
                                 <v-col cols="6"><v-btn type="submit" style="background-color: honeydew;" block > 로그인 완료 ! </v-btn></v-col>
                             </v-row>
                         </v-form>
@@ -22,6 +22,14 @@
                 </v-card>
             </v-col>
         </v-row>
+        <!-- resetPassword 가 true 가 될 때 해당 모달창이 보여짐. -->
+        <!-- @update:dialog 는 modal 컴포넌트가 update:dialog 라는 이벤트를 발생시킬 때 실행될 이벤트 핸들러를 정의한다. -->
+        <!-- $event 는 true, false 가 됨. => 자식 요소로부터 전달된 값임. (Reset... 모달로부터 전달 받은 값) -->
+        <ResetPasswordModal v-model="resetPassword" @update:dialog="resetPassword = $event">
+
+        </ResetPasswordModal>
+    
+
     </v-container>
 
 </template>
@@ -29,11 +37,17 @@
 <script>
     import axios from 'axios';
     import {jwtDecode} from 'jwt-decode';
+    import ResetPasswordModal from './ResetPasswordModal.vue';
+
     export default{
+        components:{
+            ResetPasswordModal
+        },
         data(){
             return {
                 email:"",
-                password:""
+                password:"",
+                resetPassword: false
             }
         },
         methods:{
@@ -53,12 +67,16 @@
                     localStorage.setItem('refreshToken', refreshToken);
                     localStorage.setItem('role', role);
                     window.location.href = '/';
+                    // this.$router.push('/');
                 }
                 
                 catch(e){
                     this.errorMessage = e.response.data.error_message,
                     console.log(e.response.data.error_message);
                 }
+            },
+            showPasswordModal(){
+                this.resetPassword = true;
             }
 
             }
