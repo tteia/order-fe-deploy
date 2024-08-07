@@ -21,7 +21,7 @@
 
             <v-col cols="auto" v-if="!isAdmin" :style="{marginTop:'10px'}">
                 <v-btn class="mr-2" style="background-color:aliceblue;">🛒 장바구니</v-btn>
-                <v-btn style="background-color:aliceblue;">🪄 주문하기</v-btn>
+                <v-btn @click="createOrder" style="background-color:aliceblue;">🪄 주문하기</v-btn>
             </v-col>
 
             <v-col cols="auto" v-if="isAdmin" :style="{marginTop:'10px'}">
@@ -53,8 +53,14 @@
                                     <td>{{p.name}}</td>
                                     <td>{{p.price}}</td>
                                     <td>{{p.stockQuantity}}</td>
-                                    <td></td>
-                                    <td></td>
+                                    <td align="center">
+                                        <v-text-field v-model.number="p.quantity" type="number" style="width:60px; height:52px; background-color:cornsilk;">
+
+                                        </v-text-field>
+                                    </td>
+                                    <td class="text-center" v-if="!isAdmin">
+                                        <input type="checkbox" v-model="selected[p.id]">
+                                    </td>
                                     <td v-if="isAdmin">
                                         <v-btn color="secondary" @click="deleteProduct(p.id)">❌ 삭제하기</v-btn>
                                     </td>
@@ -85,12 +91,20 @@ import axios from 'axios';
                 pageSize: 5,
                 currentPage: 0,
                 isLastPage: false,
-                isLoading: false
+                isLoading: false,
+                // selected 예시 : 상품 선택 시 true, 안하면 false
+                // 1:true
+                // 2:false
+                // 3:true => 최종적으로 {1:true, 2:false, 3:true ...} 이런 식으로 담기게 된다.
+                selected:{}
             }
         },
         created(){ // 화면 열림과 동시에 목록이 불러와지는 created hook 함수.
             this.loadProduct();
             window.addEventListener('scroll', this.scrollPagination); // scroll 로 정해져 있음 !
+        },
+        beforeUnmount(){
+            window.removeEventListener('scroll', this.scrollPagination);
         },
         methods:{
             searchProducts(){
@@ -106,7 +120,7 @@ import axios from 'axios';
                 try{
                     if(this.isLoading || this.isLastPage) return;
                     this.isLoading = true;
-                    const params = {
+                    let params = {
                         size: this.pageSize,
                         page: this.currentPage
                     }
@@ -114,22 +128,23 @@ import axios from 'axios';
                     // params = {size:5, page:0, category:"fruits"}
                     // params = {size:5, page:0, name:"cherry"}
                     if(this.searchType === 'name'){
-                        params.name = this.searchValue;
+                        params.searchName = this.searchValue;
                     }
                     else if(this.searchType === 'category'){
                         params.category = this.searchValue;
                     }
-                    // localhost:8080/product/list?category=fruites&size=5&page=0
+                    // localhost:8080/product/list?category=fruits&size=5&page=0
                     // localhost:8080/product/list?name=cherry&size=5&page=0
                     // 위와 같이 파라미터로 전달. 우리는 백엔드 서버에서 ModelAttribute 가 생략됐을 뿐, 모델로 받고 있는 것.
                     const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/product/list`, {params}); // url 에 ? 달고 들어가야 됨.
                     const additionalData = response.data.result.content;
-                    this.isLastPage = response.data.result.last;
+                    this.productList = response.data.result.content.map(p=>({...p, quantity:0}));
                     // if(this.isLastPage)return;
                     // if(additionalData.length == 0){
                     //     this.isLastPage = true;
                     //     return
                     // }
+                    // 위 코드 써주려면 searchProducts() 에 this.isLoading = false 로 초기화 필요.
                     this.productList = [...this.productList, ...additionalData];
                     this.currentPage++;
                     this.isLoading = false;
@@ -144,6 +159,30 @@ import axios from 'axios';
                 if(isBottom && !this.isLastPage && !this.isLoading){
                     this.loadProduct();
                 }
+            },
+            async createOrder(){
+                const orderProducts = Object.keys(this.selected).filter(key=>this.selected[key]) // 객체에서 key 값 뽑아내기. filter -> true 인 key 값만 뽑아내겠다 !
+                .map(key=>{
+                    const product = this.productList.find(p => p.id == key);
+                    return {productId:product.id, productCount:product.quantity};
+                });
+                if(orderProducts.length < 1){
+                    alert("재고가 부족합니다. 주문 수량을 확인해주세요.")
+                }
+                const yesOrNo = confirm(`${orderProducts.length} 개의 상품이 주문됩니다.`);
+                if(!yesOrNo){
+                    console.log("주문이 취소되었습니다.");
+                }
+                try{
+                    await axios.post(`${process.env.VUE_APP_API_BASE_URL}/order/create`, orderProducts);
+                    alert("주문 완료 !")
+                    window.location.reload();
+                }
+                catch(e){
+                    console.log(e);
+                    alert("주문 실패 !")
+                }
+                
             }
         }
     }
