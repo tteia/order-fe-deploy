@@ -94,22 +94,45 @@ import axios from 'axios';
         },
         methods:{
             searchProducts(){
-
+                this.productList = [];
+                this.currentPage = 0;
+                this.isLastPage = false;
+                this.loadProduct();
             },
             deleteProduct(productId){
                 console.log(productId);
             },
             async loadProduct(){
                 try{
-                    // pageable 객체에 맞게 파라미터 형식으로 데이터를 전송해줘야 함.
-                    // 방법 1) {params:{page10, size:2}} 와 같은 형식으로 전송 시 parameter 형식으로 변경되어 서버로 전송된다.
-                    // 방법 2) FormData 객체 생성 후 서버로 데이터 전송.
+                    if(this.isLoading || this.isLastPage) return;
+                    this.isLoading = true;
                     const params = {
                         size: this.pageSize,
                         page: this.currentPage
                     }
+                    // params 라는 객체 안에 추가해주기! 지금 size 랑 page 밖에 없다.
+                    // params = {size:5, page:0, category:"fruits"}
+                    // params = {size:5, page:0, name:"cherry"}
+                    if(this.searchType === 'name'){
+                        params.name = this.searchValue;
+                    }
+                    else if(this.searchType === 'category'){
+                        params.category = this.searchValue;
+                    }
+                    // localhost:8080/product/list?category=fruites&size=5&page=0
+                    // localhost:8080/product/list?name=cherry&size=5&page=0
+                    // 위와 같이 파라미터로 전달. 우리는 백엔드 서버에서 ModelAttribute 가 생략됐을 뿐, 모델로 받고 있는 것.
                     const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/product/list`, {params}); // url 에 ? 달고 들어가야 됨.
-                    this.productList = response.data.result.content;
+                    const additionalData = response.data.result.content;
+                    this.isLastPage = response.data.result.last;
+                    // if(this.isLastPage)return;
+                    // if(additionalData.length == 0){
+                    //     this.isLastPage = true;
+                    //     return
+                    // }
+                    this.productList = [...this.productList, ...additionalData];
+                    this.currentPage++;
+                    this.isLoading = false;
                 }
                 catch(e){
                     console.log(e);
@@ -117,7 +140,7 @@ import axios from 'axios';
             },
             scrollPagination(){
                 // 현재 화면 + 스크롤로 이동한 화면 > 전체화면 - 이동한 숫자(n) 의 조건이 성립하면 추가 데이터를 로드하겠다.
-                const isBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+                const isBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
                 if(isBottom && !this.isLastPage && !this.isLoading){
                     this.loadProduct();
                 }
