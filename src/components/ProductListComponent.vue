@@ -36,13 +36,13 @@
                         <v-table>
                             <thead>
                                 <tr>
-                                    <th>제품 사진</th>
-                                    <th>제품명</th>
-                                    <th>가격</th>
-                                    <th>재고 수량</th>
-                                    <th v-if="!isAdmin">주문 수량</th>
-                                    <th v-if="!isAdmin">주문 선택</th>
-                                    <th v-if="isAdmin">관리자 권한</th>
+                                    <th style="text-align: center;">제품 사진</th>
+                                    <th style="text-align: center;">제품명</th>
+                                    <th style="text-align: center;">가격</th>
+                                    <th style="text-align: center;">재고 수량</th>
+                                    <th v-if="!isAdmin" style="text-align: center;">주문 수량</th>
+                                    <th v-if="!isAdmin" style="text-align: center;">주문 선택</th>
+                                    <th v-if="isAdmin" style="text-align: center;">관리자 권한</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,11 +81,16 @@ import axios from 'axios';
                     {text:"📋 카테고리", value:'category'},
                 ],
                 searchValue: "",
-                productList: []
+                productList: [],
+                pageSize: 5,
+                currentPage: 0,
+                isLastPage: false,
+                isLoading: false
             }
         },
         created(){ // 화면 열림과 동시에 목록이 불러와지는 created hook 함수.
             this.loadProduct();
+            window.addEventListener('scroll', this.scrollPagination); // scroll 로 정해져 있음 !
         },
         methods:{
             searchProducts(){
@@ -96,12 +101,25 @@ import axios from 'axios';
             },
             async loadProduct(){
                 try{
-                    const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/product/list`);
+                    // pageable 객체에 맞게 파라미터 형식으로 데이터를 전송해줘야 함.
+                    // 방법 1) {params:{page10, size:2}} 와 같은 형식으로 전송 시 parameter 형식으로 변경되어 서버로 전송된다.
+                    // 방법 2) FormData 객체 생성 후 서버로 데이터 전송.
+                    const params = {
+                        size: this.pageSize,
+                        page: this.currentPage
+                    }
+                    const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/product/list`, {params}); // url 에 ? 달고 들어가야 됨.
                     this.productList = response.data.result.content;
-                    alert(response.data)
                 }
                 catch(e){
                     console.log(e);
+                }
+            },
+            scrollPagination(){
+                // 현재 화면 + 스크롤로 이동한 화면 > 전체화면 - 이동한 숫자(n) 의 조건이 성립하면 추가 데이터를 로드하겠다.
+                const isBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+                if(isBottom && !this.isLastPage && !this.isLoading){
+                    this.loadProduct();
                 }
             }
         }

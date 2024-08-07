@@ -4,13 +4,12 @@
             <v-col>
                 <v-card>
                     <v-card-title class="text-center text-h5" style="background-color:honeydew;">
-                        👩🏻‍❤️‍👨🏻 회 원 목 록
+                        회 원 목 록
                     </v-card-title>
                     <v-card-text style="background-color: cornsilk;">
                         <v-data-table :headers="tableHeaders" :items="memberList" cell-class="text-center">
                             
                         </v-data-table>
-
                     </v-card-text>
                 </v-card>
             </v-col>
