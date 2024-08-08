@@ -20,7 +20,7 @@
             </v-col>
 
             <v-col cols="auto" v-if="!isAdmin" :style="{marginTop:'10px'}">
-                <v-btn class="mr-2" style="background-color:aliceblue;">🛒 장바구니</v-btn>
+                <v-btn class="mr-2" @click="addCart" style="background-color:aliceblue;">🛒 장바구니</v-btn>
                 <v-btn @click="createOrder" style="background-color:aliceblue;">🪄 주문하기</v-btn>
             </v-col>
 
@@ -76,8 +76,12 @@
 
 <script>
 import axios from 'axios';
+import { mapGetters } from 'vuex';
     export default{
         props: ['isAdmin', 'pageTitle'],
+        computed:{
+            ...mapGetters(['getProductsInCart'])
+        },
         data(){
             return{
                 searchType: 'optional',
@@ -111,6 +115,7 @@ import axios from 'axios';
                 this.productList = [];
                 this.currentPage = 0;
                 this.isLastPage = false;
+                this.isLoading = false;
                 this.loadProduct();
             },
             deleteProduct(productId){
@@ -138,13 +143,11 @@ import axios from 'axios';
                     // 위와 같이 파라미터로 전달. 우리는 백엔드 서버에서 ModelAttribute 가 생략됐을 뿐, 모델로 받고 있는 것.
                     const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/product/list`, {params}); // url 에 ? 달고 들어가야 됨.
                     const additionalData = response.data.result.content;
-                    this.productList = response.data.result.content.map(p=>({...p, quantity:0}));
-                    // if(this.isLastPage)return;
-                    // if(additionalData.length == 0){
-                    //     this.isLastPage = true;
-                    //     return
-                    // }
-                    // 위 코드 써주려면 searchProducts() 에 this.isLoading = false 로 초기화 필요.
+                    // this.productList = response.data.result.content.map(p=>({...p, quantity:0}));
+                    if(additionalData.length == 0){
+                        this.isLastPage = true;
+                        return;
+                    }
                     this.productList = [...this.productList, ...additionalData];
                     this.currentPage++;
                     this.isLoading = false;
@@ -159,6 +162,16 @@ import axios from 'axios';
                 if(isBottom && !this.isLastPage && !this.isLoading){
                     this.loadProduct();
                 }
+            },
+            addCart(){
+                const orderProducts = Object.keys(this.selected).filter(key=>this.selected[key]) // 객체에서 key 값 뽑아내기. filter -> true 인 key 값만 뽑아내겠다 !
+                .map(key=>{
+                    const product = this.productList.find(p => p.id == key);
+                    return {id:product.id, name:product.name, quantity:product.quantity};
+                });
+                orderProducts.forEach(p => this.$store.dispatch('addCart', p));
+                // window.location.reload();
+                console.log(this.getProductsInCart);
             },
             async createOrder(){
                 const orderProducts = Object.keys(this.selected).filter(key=>this.selected[key]) // 객체에서 key 값 뽑아내기. filter -> true 인 key 값만 뽑아내겠다 !

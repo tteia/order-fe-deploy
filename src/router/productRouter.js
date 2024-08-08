@@ -1,5 +1,6 @@
 import ProductList from "@/views/ProductList.vue";
 import ProductListManage from "@/views/ProductListManage.vue";
+import ProductCreate from "@/views/ProductCreate.vue";
 
 
 export const productRouter = [
@@ -17,6 +18,11 @@ export const productRouter = [
         path: '/product/manage',
         name: 'ProductManage',
         component: ProductListManage
+    },
+    {
+        path: '/product/create',
+        name: 'ProductCreate',
+        component: ProductCreate
     }
 
 ]

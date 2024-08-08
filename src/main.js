@@ -7,6 +7,7 @@ import router from '@/router/index.js';
 import vuetify from '@/plugins/vuetify';
 import '@mdi/font/css/materialdesignicons.css'
 import axios from 'axios';
+import store from './store/index.js'
 
 
 // createApp(App).mount('#app')
@@ -52,7 +53,7 @@ axios.interceptors.response.use(
 )
 
 
-
+app.use(store);
 app.use(router);
 app.use(vuetify);
 app.mount('#app');
