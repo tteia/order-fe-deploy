@@ -12,7 +12,7 @@
                     </div>
                 </v-col>
                 <v-col class="text-center">
-                    <v-btn :to="{path:'/'}" style="color:orangered;"> 🏡 tteia.xyz 🩵 </v-btn>
+                    <v-btn :to="{path:'/'}" style="color:orangered;"> 🏡 tteia.xyzzz 🩵 </v-btn>
                 </v-col>
                 <v-col class="d-flex justify-end">
                     <v-btn :to="{path:'/product/list'}">상품 목록</v-btn>
