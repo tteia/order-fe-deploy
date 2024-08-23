@@ -3,7 +3,7 @@ name: deploy to aws s3
 on:
   push:
     branches:
-      - main
+      - dev
 jobs:
   # 워크플로우는 하나 이상의 작업(job)으로 구성. 여기서는 하나의 작업만을 정의.
   build-and-deploy:
@@ -19,7 +19,7 @@ jobs:
       - name: setup node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: npm install
         working-directory: .
@@ -36,15 +36,14 @@ jobs:
           aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
           aws-secret-access-key: ${{secrets.AWS_SECRET}}
           aws-region: "ap-northeast-2"
-        
+
           # 기존 지우고 빌드 넣어주기
       - name: clear s3 bucket
         run: aws s3 rm s3://www.tteia.xyz/ --recursive
 
       - name: deploy to s3 bucket
-        run: aws s3 cp ./dist s3://www.tteia.xyz/ --recursive
+        run:
+          aws s3 cp ./dist s3://www.tteia.xyz/ --recursive
           # cloudfront 에서 무효화 생성 버튼을 눌러주는 것과 같다 !
       - name: invalidate cloudfront caches
         run: aws cloudfront create-invalidation --distribution-id EPLILOI974LXR --paths "/*"
-
-
