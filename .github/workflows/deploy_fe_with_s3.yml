@@ -44,6 +44,4 @@ jobs:
       - name: deploy to s3 bucket
         run:
           aws s3 cp ./dist s3://www.tteia.xyz/ --recursive
-          # cloudfront 에서 무효화 생성 버튼을 눌러주는 것과 같다 !
-      - name: invalidate cloudfront caches
-        run: aws cloudfront create-invalidation --distribution-id EPLILOI974LXR --paths "/*"
+
