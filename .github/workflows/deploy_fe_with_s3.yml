@@ -47,4 +47,4 @@ jobs:
 
       - name: invalidate cloudfront cache
         run:
-          aws cloudefront create-invalidation --distribution-id EPLILOI974LXR --paths "/*"
+          aws cloudfront create-invalidation --distribution-id EPLILOI974LXR --paths "/*"
